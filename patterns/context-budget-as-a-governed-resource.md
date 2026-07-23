@@ -22,7 +22,7 @@ Treat the context budget like any other governed resource: measured, trended, an
 - **Hard budget caps on unattended runs.** Every scheduled agent invocation carries a spend ceiling (a `--max-budget-usd`-style flag), sized 10–50x a normal cycle. It is a belt against runaway loops, not a tuning knob.
 - **Fan-out bounded by construction.** Estimate agent count before running any multi-agent workflow and cap every stage. A workflow whose agent count scales with discovered data (claims, files, matches) is a cost bomb until bounded.
 - **Index ceilings.** Memory and index files carry explicit line/KB caps with an overflow rule (migrate detail to per-topic files), so the always-loaded set cannot grow unbounded by design.
-- **Compaction instructions.** A standing note tells the runtime what must survive context compaction (decisions with rationale, in-flight edits, open questions) and what may be discarded, so compaction never silently deletes the load-bearing parts.
+- **Compaction instructions.** A standing note tells the runtime what must survive context compaction (decisions with rationale, in-flight edits, open questions) and what may be discarded, so compaction never silently deletes the essential parts.
 
 ```pseudo
 baseline = sum(estimate_tokens(src) for src in always_loaded_sources)

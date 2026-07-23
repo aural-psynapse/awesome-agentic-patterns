@@ -62,11 +62,13 @@ This is deliberately orthogonal to [Workflow Evals with Mocked Tools](workflow-e
 ## Trade-offs
 
 **Pros:**
+
 - Isolates delegation-quality bugs that end-to-end evals otherwise blame on the wrong sub-agent.
 - Topology-indexed scoring shows exactly where orchestration degrades as systems scale past simple chains/stars.
 - Cheap to extend: new scenarios are just (topology, fragments, ground-truth assignment) tuples.
 
 **Cons:**
+
 - Requires hand-authoring ground-truth fragment/role assignments per scenario, which does not scale automatically to a new domain.
 - A single benchmark; treat absolute scores as directional until independently replicated.
 - Does not replace end-to-end evals — a system can score well here and still fail downstream for unrelated reasons (bad tools, bad models).
