@@ -2,9 +2,9 @@
 title: Zero-Knowledge Verified Agent Egress
 status: emerging
 authors: ["Provably (@aural-psynapse)"]
-based_on: ["Zero-knowledge proofs", "Trusted-endpoint allow-listing"]
+based_on: ["Zero-knowledge proofs", "Zero trust architecture", "Trusted-endpoint allow-listing"]
 category: "Security & Safety"
-source: "https://github.com/ProvablyAI/sourcerykit"
+source: "https://csrc.nist.gov/pubs/sp/800/207/final"
 tags: [egress, zero-knowledge-proof, source-of-truth, allow-list, mcp, outbound-verification, runtime-protection]
 ---
 
@@ -37,17 +37,21 @@ This is complementary to [Egress Lockdown (No-Exfiltration Channel)](egress-lock
 
 - **Evidence Grade:** medium
 - **Most Valuable Findings:**
-  - Zero-knowledge proofs let a verifier confirm a claim without seeing the secret behind it, so the source of truth stays private from both the agent and the destination.
+  - NIST SP 800-207 (Zero Trust Architecture) establishes per-request verification before granting access as a core tenet; this pattern applies the same tenet to an agent's outbound calls.
+  - Zero-knowledge proofs let a verifier confirm a claim without seeing the secret behind it (Goldwasser, Micali & Rackoff, 1989), so the source of truth stays private from both the agent and the destination.
+  - The agentic-security literature classifies tool misuse and tampered tool arguments as a distinct threat class that network-layer egress controls do not cover (see the survey arXiv:2510.06445 and OWASP's Agentic AI threat taxonomy).
   - Hooking at the HTTP and MCP layer catches outbound calls regardless of which framework produced them.
 - **Unverified / Unclear:** Proof-generation latency and the operational cost of running the verification backend at high call volumes need more production data.
 
 ## How to use it
 
-- Wrap any agent framework that makes outbound HTTP or MCP tool calls (LangChain, CrewAI, MCP servers, custom SDKs).
+- Wrap any agent framework that makes outbound HTTP or MCP tool calls (LangChain, CrewAI, MCP servers, custom SDKs) so every outbound request passes through the verification layer.
 - Define the source of truth for the flows that matter (approved recipients, order details, policy limits) and a trusted-endpoint allow-list.
-- Route outbound calls through the verification layer; treat a failed proof or a non-allowlisted endpoint as a hard block.
+- Pick a proof mechanism: a zero-knowledge proof keeps the source of truth private from both the agent and the destination; where privacy is not a constraint, a signed attestation from the verifier achieves the same gating.
+- Route outbound calls through the layer; treat a failed proof or a non-allowlisted endpoint as a hard block.
 - Keep the signed logs for audit and incident review.
-- Reference implementation: [SourceryKit](https://github.com/ProvablyAI/sourcerykit), a Python SDK (source-available, BSL 1.1) that hooks the HTTP libraries and pairs with a hosted backend that runs the proof and source-of-truth check.
+
+An existing implementation of this pattern is [SourceryKit](https://github.com/ProvablyAI/sourcerykit) (Python SDK, source-available), which hooks the HTTP libraries and runs the proof and source-of-truth check against a backend.
 
 ## Trade-offs
 
@@ -56,5 +60,9 @@ This is complementary to [Egress Lockdown (No-Exfiltration Channel)](egress-lock
 
 ## References
 
-- [SourceryKit](https://github.com/ProvablyAI/sourcerykit)
+- [NIST SP 800-207: Zero Trust Architecture](https://csrc.nist.gov/pubs/sp/800/207/final)
+- [Goldwasser, Micali & Rackoff: The Knowledge Complexity of Interactive Proof Systems (SIAM J. Comput., 1989)](https://doi.org/10.1137/0218012)
+- [A Survey on Agentic Security (arXiv:2510.06445)](https://arxiv.org/abs/2510.06445)
+- [OWASP GenAI Security Project: Agentic AI - Threats and Mitigations](https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/)
 - [Egress Lockdown (No-Exfiltration Channel)](egress-lockdown-no-exfiltration-channel.md)
+- [SourceryKit](https://github.com/ProvablyAI/sourcerykit) (implementation)
